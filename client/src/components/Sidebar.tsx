@@ -9,8 +9,6 @@ import Link from "next/link";
 import useAuth from "@/hooks/useAuth";
 import { User } from "@/types/user";
 
-import Logo from "@/public/anti-bikli-logo.png";
-
 type SidebarProps = {
   items?: SidebarItemData[];
   user?: User;
@@ -38,11 +36,12 @@ export default function Sidebar({ items, isOpen, closeSidebar }: SidebarProps) {
         <div className="flex h-16 w-full items-center justify-between border-b border-b-sidebar-divider px-4 py-2 sm:px-5 lg:px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
             <Image
-              src={Logo}
+              src="/anti-bikli-logo.png"
               width={100}
               height={100}
               alt="Anti Bikli Ventures Logo"
               className="h-6 w-auto"
+              loading="lazy"
             />
             <span className="text-lg font-bold">Anti Bikli</span>
           </Link>
