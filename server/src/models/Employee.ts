@@ -1,20 +1,29 @@
 import { Schema, model, Types } from "mongoose";
 
-export interface IUser {
+export interface IEmployee {
+  name: string;
   email: string;
-  password: string; // hashed
-  role: "admin" | "employee";
-  employee: Types.ObjectId; // ref -> Employee
+  phone?: string;
+  department: string;
+  designation: string;
+  joinDate: Date;
+  baseSalary: number;
+  isActive: boolean;
 }
 
-const userSchema = new Schema<IUser>(
+const employeeSchema = new Schema<IEmployee>(
   {
+    name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: { type: String, enum: ["admin", "employee"], default: "employee" },
-    employee: { type: Schema.Types.ObjectId, ref: "Employee", required: true },
+    phone: { type: String },
+    department: { type: String, required: true },
+    designation: { type: String, required: true },
+    joinDate: { type: Date, required: true },
+    baseSalary: { type: Number, required: true, min: 0 },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-export const User = model<IUser>("User", userSchema);
+export const Employee = model<IEmployee>("Employee", employeeSchema);
+export type EmployeeId = Types.ObjectId;
