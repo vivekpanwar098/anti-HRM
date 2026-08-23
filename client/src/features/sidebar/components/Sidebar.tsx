@@ -1,13 +1,14 @@
 "use client";
 
 import { SidebarCloseIcon, CircleHelp, LucideLogOut } from "lucide-react";
-import SidebarItem, { type SidebarItemData } from "@/components/SidebarItem";
+import SidebarItem, { type SidebarItemData } from "./SidebarItem";
 
 import Image from "next/image";
 import Link from "next/link";
 
-import useAuth from "@/hooks/useAuth";
-import { User } from "@/types/user";
+import useAuth from "@/features/auth/hooks/useAuth";
+import type { User } from "@/lib/types/user";
+import Avatar from "@/components/ui/Avatar";
 
 type SidebarProps = {
   items?: SidebarItemData[];
@@ -68,17 +69,7 @@ export default function Sidebar({ items, isOpen, closeSidebar }: SidebarProps) {
           </Link>
           <div className="flex justify-between items-center mt-4">
             <div className="flex gap-2">
-              {user?.profileImage ? (
-                <Image
-                  src={user?.profileImage}
-                  alt="User profile image"
-                  className="h-10 w-10 object-cover rounded-full border-2 "
-                />
-              ) : (
-                <span className="h-10 w-10 object-cover rounded-full bg-theme text-white flex items-center justify-center">
-                  {user?.name[0]}
-                </span>
-              )}
+              <Avatar name={user?.name ?? ""} src={user?.profileImage} />
               <span>
                 <h4 className="font-bold">{user?.name}</h4>
                 <p className="text-xs">{user?.role}</p>
