@@ -273,6 +273,43 @@ describe("SidebarItem", () => {
 
 ## 6. Pull Requests & Code Review on GitHub
 
+> **Reviews happen on pull requests, never on direct pushes to `main`.**
+> Branch protection (see "Protecting `main`" below) makes this technically enforced — nobody can push straight to `main`.
+
+### Step-by-step: how to review a PR on GitHub
+
+1. **Find out something needs review.** GitHub notifies you (bell icon / email) when you are added as a reviewer or @mentioned. You can also open the repo → **Pull requests** tab → filter by open PRs or the `needs-review` label.
+
+2. **Read the PR description first.** Check the ticket link, the "What does this PR do" section, and that the checklist is filled. A PR without context goes back with a `blocking:` comment.
+
+3. **Check CI before reading code.** At the bottom of the PR (or in the **Checks** tab), wait for lint / test / build to pass. If CI is red, comment `blocking: CI is failing, please fix` and stop there — don't review broken code line by line.
+
+4. **Review the diff in the *Files changed* tab.**
+   - Read every changed line; use **Hide whitespace changes** to skip noise.
+   - Hover any line → blue **+** → write an inline comment. Select multiple lines with <kbd>Shift</kbd>-click for ranged comments.
+   - Prefix comments with `nit:` / `suggestion:` / `blocking:` so the author knows what must change.
+   - To propose exact replacement code: select lines → click the **±** button → GitHub wraps your snippet in a ```suggestion``` block the author can accept with one click.
+   - Also skim the **Commits** tab — messy history ("fix typo", "asdf") signals the PR should be cleaned up.
+
+5. **Run it locally when the change is risky** (auth, data models, big refactors):
+
+   ```bash
+   git fetch origin pull/<PR-number>/head:review-pr-<number>
+   git checkout review-pr-<number>
+   npm run setup
+   npm run test
+   npm run dev
+   ```
+
+6. **Submit the verdict.** Top-right → **Review changes** → pick one:
+   - **Comment** — feedback only, no verdict.
+   - **Approve** — good to merge.
+   - **Request changes** — has `blocking:` issues; the author must fix and re-request review.
+
+7. **After the author pushes fixes.** Re-open the PR → check the new commits in *Files changed* → resolve your conversation threads (or explain why not) → submit an **Approve** once everything is resolved.
+
+8. **Merge & clean up.** The **author** presses **Squash and merge**, then deletes the branch. If you merged someone else's PR by accident, say so in the thread.
+
 ### Opening a PR
 
 1. Push your branch and open a **Draft PR early** for big work, mark **Ready for Review** when complete.
@@ -325,11 +362,13 @@ describe("SidebarItem", () => {
 
 ### Protecting `main`
 
-GitHub repo settings (owner/admin):
+This is what forces "anyone who pushes code must go through a PR + review". Repo **Settings → Branches → Add branch ruleset / branch protection rule** for `main`:
 
-- ✅ Require pull request before merging (1 approval)
-- ✅ Require status checks: lint, build, tests
-- ✅ Require linear history; block force pushes & deletions
+1. ✅ Require a pull request before merging — required approvals: **1**
+2. ✅ Require status checks to pass — select `Client — lint, test, build` and `Server — build & test` (appear after first CI run)
+3. ✅ Require linear history; block force pushes & deletions
+
+Without this rule, anyone with write access can push straight to `main` and skip review entirely — set it up on day one.
 
 ---
 
