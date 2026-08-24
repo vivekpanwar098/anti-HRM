@@ -4,17 +4,52 @@ Monorepo with two independent apps, built and deployed separately:
 
 ```
 company-portal/
-├── client/                    # Next.js frontend (React 19, Tailwind CSS 4)
+├── client/                        # Next.js frontend (React 19, Tailwind CSS 4)
 │   └── src/
-│       ├── app/               # routes (keep thin)
-│       ├── features/<name>/   # feature-scoped components & hooks
-│       └── lib/               # shared helpers & domain types
-└── server/                    # Express API (TypeScript, MongoDB, JWT)
+│       ├── app/
+│       │   ├── login/             # auth screens
+│       │   ├── employee/**        # EMPLOYEE zone routes  → one developer
+│       │   ├── admin/**           # ADMIN zone routes     → other developer
+│       │   └── dashboard/         # shared landing (redirects by role)
+│       ├── components/
+│       │   ├── ui/                # shared UI kit (Button, Card, Table…)
+│       │   └── layout/            # shared shells (Sidebar, Header)
+│       ├── context/               # AuthContext (shared auth state)
+│       ├── features/
+│       │   ├── admin/             # ADMIN zone: components / hooks / services
+│       │   ├── employee/          # EMPLOYEE zone: components / hooks / services
+│       │   ├── auth/              # useAuth hook
+│       │   ├── header/            # Header component
+│       │   └── sidebar/           # Sidebar components
+│       ├── services/              # axios instance (API base URL)
+│       └── lib/                   # shared helpers & domain types
+└── server/                        # Express API (TypeScript, MongoDB, JWT)
     └── src/
-        ├── modules/<name>/    # router → controller → service → model
-        ├── middleware/        # auth, error handler, validators
-        └── config/            # db connection etc.
+        ├── controllers/           # admin / auth / employee / leave
+        ├── middlewares/           # auth (JWT), validation
+        ├── models/                # User, Employee, Attendance, Leave, Payroll
+        ├── routes/                # per-resource routers mounted at /api/v1
+        ├── utils/                 # jwt helpers
+        ├── validation/            # zod schemas
+        └── config/                # db connection, env
 ```
+
+## Role-based zones (two frontend developers)
+
+The frontend is split so each developer works in their own area without merge
+conflicts:
+
+| Zone     | Owner               | Routes                  | Feature code                     |
+| -------- | ------------------- | ----------------------- | -------------------------------- |
+| Admin    | Admin-side dev      | `src/app/admin/**`      | `src/features/admin/**`          |
+| Employee | Employee-side dev   | `src/app/employee/**`   | `src/features/employee/**`       |
+
+Rules:
+
+1. Only touch your own zone (`app/<zone>` + `features/<zone>`).
+2. Shared code (`components/ui`, `components/layout`, `context`, `services`,
+   `lib`) is common ground — coordinate in PR review before changing it.
+3. Route files stay thin; all screens live inside `features/<zone>/components`.
 
 ## Quick start
 

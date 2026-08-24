@@ -10,7 +10,7 @@ import cors from "cors";
 import { isDBConnected } from "./config/db.js";
 import routes from "./routes.js";
 
-const app: Application = express();
+export const app: Application = express();
 
 app.use(cors());
 app.use(express.json());

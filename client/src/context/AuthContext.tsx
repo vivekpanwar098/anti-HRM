@@ -1,3 +1,5 @@
+"use client";
+
 import { User } from "@/lib/types/user";
 import api from "@/services/axios";
 import { createContext, ReactNode, useState } from "react";
