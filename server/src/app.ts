@@ -8,9 +8,7 @@ import express, {
 } from "express";
 import cors from "cors";
 import { connectDB, isDBConnected } from "./config/db.js";
-import authRoutes from "./routes/auth.route.js";
-import adminRoutes from "./routes/admin.route.js";
-import employeeRoutes from "./routes/employee.route.js";
+import routes from "./routes.js"
 
 const app: Application = express();
 
@@ -27,10 +25,7 @@ app.use((_req: Request, res: Response, next: NextFunction): void => {
 });
 
 
-app.use("/api/auth", authRoutes);
-
-app.use("/api/admin", adminRoutes);
-app.use("/api/employee", employeeRoutes);
+app.use("/api/v1/", routes);
 
 app.get("/health", (_req: Request, res: Response): void => {
   res.json({ status: "ok", db: isDBConnected() ? "connected" : "disconnected" });
