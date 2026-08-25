@@ -27,7 +27,7 @@ export default function SidebarItem({ item }: SidebarItemProps) {
       className={`flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium text-sidebar-text/80 transition-colors duration-200  hover:text-sidebar-text ${isActive ? "bg-sidebar-active-bg " : "hover:bg-sidebar-hover-bg"}`}
     >
       <Icon className="h-4 w-4 shrink-0 " />
-      <span className="pt-1">{label}</span>
+      <span className="">{label}</span>
     </Link>
   );
 }
