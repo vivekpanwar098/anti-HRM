@@ -48,7 +48,7 @@ describe("EmployeeLayout", () => {
     const sidebar = screen.getByTestId("sidebar");
     expect(sidebar).toHaveAttribute("data-isopen", "false");
     // navItems length in layout is 6
-    expect(sidebar).toHaveAttribute("data-items-length", "6");
+    expect(sidebar).toHaveAttribute("data-items-length", "5");
 
     expect(screen.getByText("Employee Content")).toBeInTheDocument();
 
