@@ -49,7 +49,7 @@ export default function Avatar({ name, src, size = "md", className }: AvatarProp
       aria-label={name}
       title={name}
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-full bg-theme font-semibold text-white",
+        "flex shrink-0 items-center justify-center rounded-full bg-theme font-semibold text-white pt-1",
         sizeClasses[size],
         className
       )}
