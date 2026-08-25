@@ -19,6 +19,7 @@ type SidebarProps = {
 
 export default function Sidebar({ items, isOpen, closeSidebar }: SidebarProps) {
   const { user } = useAuth();
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -35,16 +36,25 @@ export default function Sidebar({ items, isOpen, closeSidebar }: SidebarProps) {
       >
         {/* Sidebar Header  */}
         <div className="flex h-16 w-full items-center justify-between border-b border-b-sidebar-divider px-4 py-2 sm:px-5 lg:px-6">
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link
+            href={
+              user?.role === "employee"
+                ? "/employee/dashboard"
+                : "/admin/dashboard"
+            }
+            className="flex items-center gap-4"
+          >
             <Image
-              src="/anti-bikli-logo.png"
+              src="/logo.png"
               width={100}
               height={100}
               alt="Anti Bikli Ventures Logo"
               className="h-6 w-auto"
               loading="lazy"
             />
-            <span className="text-lg font-bold">Anti Bikli</span>
+            <h3 className="text-xl font-bold">
+              {process.env.NEXT_PUBLIC_TITLE || "Anti Bikli HRMS"}
+            </h3>
           </Link>
           <button className="lg:hidden cursor-pointer" onClick={closeSidebar}>
             <SidebarCloseIcon />

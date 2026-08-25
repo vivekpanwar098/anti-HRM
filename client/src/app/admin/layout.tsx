@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import EmployeeAuthWrapper from "@/components/EmployeeAuthWrapper";
+import AdminAuthWrapper from "@/components/AdminAuthWrapper";
 import Sidebar from "@/features/sidebar/components/Sidebar";
 import Header from "@/features/header/components/Header";
 import type { SidebarItemData } from "@/features/sidebar/components/SidebarItem";
@@ -10,22 +10,29 @@ import {
   CalendarCheck,
   Users,
   Wallet,
+  FileText,
+  Megaphone,
+  BarChart3,
   Settings,
 } from "lucide-react";
 
 const navItems: SidebarItemData[] = [
-  { label: "Dashboard", Icon: LayoutDashboard, url: "/employee/dashboard" },
-  { label: "Attendance", Icon: CalendarCheck, url: "/employee/attendance" },
-  { label: "Leaves", Icon: Users, url: "/employee/leaves" },
-  { label: "Payroll", Icon: Wallet, url: "/employee/payroll" },
-  { label: "Settings", Icon: Settings, url: "/employee/settings" },
+  { label: "Dashboard", Icon: LayoutDashboard, url: "/admin/dashboard" },
+  { label: "Attendance", Icon: CalendarCheck, url: "/admin/attendance" },
+  { label: "Employees", Icon: Users, url: "/admin/employees" },
+  { label: "Leaves", Icon: FileText, url: "/admin/leaves" },
+  { label: "Payroll", Icon: Wallet, url: "/admin/payroll" },
+  { label: "Documents", Icon: FileText, url: "/admin/documents" },
+  { label: "Announcements", Icon: Megaphone, url: "/admin/announcements" },
+  { label: "Reports", Icon: BarChart3, url: "/admin/reports" },
+  { label: "Settings", Icon: Settings, url: "/admin/settings" },
 ];
 
-export default function EmployeeLayout({ children }: { children: ReactNode }) {
+export default function AdminLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <EmployeeAuthWrapper>
+    <AdminAuthWrapper>
       <div className="min-h-screen bg-primary-bg text-primary">
         <Sidebar
           items={navItems}
@@ -38,6 +45,6 @@ export default function EmployeeLayout({ children }: { children: ReactNode }) {
           <main className="flex-1 p-4 sm:p-6">{children}</main>
         </div>
       </div>
-    </EmployeeAuthWrapper>
+    </AdminAuthWrapper>
   );
 }

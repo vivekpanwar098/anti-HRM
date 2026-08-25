@@ -13,13 +13,7 @@ type AuthContextType = {
 };
 
 const DefaultAuthContextValue: AuthContextType = {
-  user: {
-    id: "24224",
-    name: "Vishal",
-    role: "admin",
-    email: "abc@gmail.com",
-    employeeId: "234",
-  },
+  user: null,
   login: async () => {},
   logout: async () => {},
   isAuthLoading: false,
