@@ -10,7 +10,6 @@ import {
   CalendarCheck,
   Users,
   Wallet,
-  User,
   Settings,
 } from "lucide-react";
 
@@ -19,7 +18,6 @@ const navItems: SidebarItemData[] = [
   { label: "Attendance", Icon: CalendarCheck, url: "/employee/attendance" },
   { label: "Leaves", Icon: Users, url: "/employee/leaves" },
   { label: "Payroll", Icon: Wallet, url: "/employee/payroll" },
-  { label: "Profile", Icon: User, url: "/employee/profile" },
   { label: "Settings", Icon: Settings, url: "/employee/settings" },
 ];
 
