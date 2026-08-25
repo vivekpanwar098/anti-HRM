@@ -2,9 +2,20 @@
 @import "tailwindcss";
 
 @layer base {
-  h1 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: "Plus Jakarta Sans", sans-serif;
+  }
+  h1 {
     font-size: 2rem;
+  }
+
+  button {
+    cursor: pointer;
   }
 }
 
@@ -14,25 +25,27 @@
 
   /* background color */
   --color-primary-bg: #f9fafb;
-  --color-secondary-bg: white;
+  --color-secondary-bg: #ffffff;
 
   /* body text color */
-  --color-primary: black;
-  --color-secondary: gray;
+  --color-primary: #172126;
+  --color-secondary: #59666b;
+  --color-muted: #849095;
 
   /*Sidebar */
-  --color-sidebar: #142127;
-  --color-sidebar-text: #d5d8d7;
-  --color-sidebar-icon: #aeb4b2;
-  --color-sidebar-active-bg: #18a096;
-  --color-sidebar-active-text: #ffffff;
-  --color-sidebar-hover-bg: #183f3d;
-  --color-sidebar-hover-text: #e0f4f2;
-  --color-sidebar-divider: #383a3b;
+  --color-sidebar: #142127; /*Sidebar background color */
+  --color-sidebar-text: #d5d8d7; /*Default sidebar item text color*/
+  --color-sidebar-icon: #aeb4b2; /*Default sidebar item icon color*/
+  --color-sidebar-active-bg: #18a096; /* Sidebar active navigation item background color*/
+  --color-sidebar-active-text: #ffffff; /* Sidebar active navigation item text color*/
+  --color-sidebar-hover-bg: #183f3d; /*Sidebar hover navigation item background  color*/
+  --color-sidebar-hover-text: #e0f4f2; /*Sidebar hover navigation item text color*/
+  --color-sidebar-divider: #383a3b; /*Sidebar section divider color*/
 }
 
 body {
   background-color: var(--color-primary-bg);
+  color: var(--color-primary);
   font-family: "Roboto", sans-serif;
 }
 
