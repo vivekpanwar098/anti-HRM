@@ -2,6 +2,7 @@
 
 import { User } from "@/lib/types/user";
 import api from "@/services/axios";
+import { useRouter } from "next/navigation";
 import { createContext, ReactNode, useState } from "react";
 import { toast } from "sonner";
 
@@ -25,6 +26,7 @@ export const AuthContext = createContext<AuthContextType>(
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const router = useRouter();
 
   const login = async (email: string, password: string) => {
     try {
@@ -34,6 +36,9 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         password,
       });
       setUser(res.data.user);
+      if (res.data.user?.role === "employee")
+        router.push("/employee/dashboard");
+      if (res.data.user?.role === "admin") router.push("/admin/dashboard");
       toast.success(`Welcome back ${res.data.user.name.split(" ")[0]}`);
     } catch {
       toast.error("Incorrect email or password");
