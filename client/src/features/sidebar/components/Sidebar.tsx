@@ -45,16 +45,21 @@ export default function Sidebar({ items, isOpen, closeSidebar }: SidebarProps) {
             className="flex items-center gap-4"
           >
             <Image
-              src="/logo.png"
+              src="/emplyra-logo.png"
               width={100}
               height={100}
-              alt="Anti Bikli Ventures Logo"
-              className="h-6 w-auto"
-              loading="lazy"
+              alt="Emplyra Logo"
+              className="h-8 w-auto"
+              priority
             />
-            <h3 className="text-xl font-bold">
-              {process.env.NEXT_PUBLIC_TITLE || "Anti Bikli HRMS"}
-            </h3>
+            <Image
+              src="/emplyra-logo-heading.png"
+              width={100}
+              height={100}
+              alt="Emplyra Heading Logo"
+              className="h-6 w-auto"
+              priority
+            />
           </Link>
           <button className="lg:hidden cursor-pointer" onClick={closeSidebar}>
             <SidebarCloseIcon />
