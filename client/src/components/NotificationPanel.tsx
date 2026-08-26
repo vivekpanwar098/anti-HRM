@@ -13,40 +13,13 @@ type NotificationPanelProps = {
   setUnreadNotificationCount?: (count: number) => void;
 };
 
-const mockNotifications = [
-  {
-    id: "1",
-    title: "Payroll ready",
-    body: "Your team's payroll for July is ready to review.",
-    createdAt: new Date(),
-    isRead: true,
-  },
-  {
-    id: "2",
-    title: "Leave approved",
-    body: "Anna's leave request has been approved.",
-    createdAt: "1d ago",
-  },
-  {
-    id: "3",
-    title: "New sign-in",
-    body: "New sign-in from a new device for Mark.",
-    createdAt: "3d ago",
-  },
-];
-
 export default function NotificationPanel({
   closeNotificationPanel,
   unreadNotificationCount = 0,
   setUnreadNotificationCount,
 }: NotificationPanelProps) {
   const listRef = useRef<HTMLDivElement | null>(null);
-  const [allNotifications, setAllNotifications] = useState<Notification[]>([
-    ...mockNotifications,
-    ...mockNotifications,
-    ...mockNotifications,
-    ...mockNotifications,
-  ]);
+  const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -129,6 +102,7 @@ export default function NotificationPanel({
     0,
     Math.min(visibleCount, allNotifications.length || PAGE_SIZE),
   );
+  const hasNotifications = visibleNotifications.length > 0;
   const hasMoreNotifications =
     allNotifications.length > visibleCount && allNotifications.length > 0;
 
@@ -200,43 +174,56 @@ export default function NotificationPanel({
                 onScroll={handleScroll}
                 className="max-h-80 overflow-y-auto sidebar-scroll"
               >
-                <ul className="divide-y divide-zinc-200">
-                  {visibleNotifications.map((n) => (
-                    <li key={n.id} className="px-4 py-3 hover:bg-zinc-50">
-                      <div className="flex items-start gap-3">
-                        <div
-                          className="mt-0.5 h-3.5 w-3.5 rounded-full bg-theme shrink-0"
-                          aria-hidden={!n.isRead}
-                          style={{ opacity: n.isRead ? 1 : 0.15 }}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-3">
-                            <p className="truncate text-sm font-medium text-zinc-800">
-                              {n.title}
-                            </p>
-                            <p className="ml-auto shrink-0 text-[10px] text-zinc-500 whitespace-nowrap">
-                              {formatRelativeTime(n.createdAt)}
-                            </p>
-                          </div>
-                          <div className="mt-1 flex items-center justify-between gap-2">
-                            <p className="text-xs text-zinc-600 truncate">
-                              {n.body}
-                            </p>
-                            {!n.isRead && (
-                              <button
-                                onClick={() => markAsRead(n.id)}
-                                className="shrink-0 text-[10px] font-medium text-zinc-600 hover:text-zinc-800"
-                                aria-label={`Mark ${n.title} as read`}
-                              >
-                                Mark as read
-                              </button>
-                            )}
+                {hasNotifications ? (
+                  <ul className="divide-y divide-zinc-200">
+                    {visibleNotifications.map((n) => (
+                      <li key={n.id} className="px-4 py-3 hover:bg-zinc-50">
+                        <div className="flex items-start gap-3">
+                          <div
+                            className="mt-0.5 h-3.5 w-3.5 rounded-full bg-theme shrink-0"
+                            aria-hidden={!n.isRead}
+                            style={{ opacity: n.isRead ? 1 : 0.15 }}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="truncate text-sm font-medium text-zinc-800">
+                                {n.title}
+                              </p>
+                              <p className="ml-auto shrink-0 text-[10px] text-zinc-500 whitespace-nowrap">
+                                {formatRelativeTime(n.createdAt)}
+                              </p>
+                            </div>
+                            <div className="mt-1 flex items-center justify-between gap-2">
+                              <p className="text-xs text-zinc-600 truncate">
+                                {n.body}
+                              </p>
+                              {!n.isRead && (
+                                <button
+                                  onClick={() => markAsRead(n.id)}
+                                  className="shrink-0 text-[10px] font-medium text-zinc-600 hover:text-zinc-800"
+                                  aria-label={`Mark ${n.title} as read`}
+                                >
+                                  Mark as read
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="flex min-h-28 items-center justify-center px-4 py-8 text-center">
+                    <div>
+                      <p className="text-sm font-medium text-zinc-700">
+                        No notifications yet
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        You&apos;re all caught up.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {isLoadingMore && hasMoreNotifications && (
                   <div className="flex items-center justify-center gap-2 px-4 py-3 text-xs text-zinc-500">
@@ -249,7 +236,8 @@ export default function NotificationPanel({
               <div className="border-t border-zinc-200 bg-zinc-50 px-4 py-3">
                 <button
                   onClick={markAllAsRead}
-                  className="w-full text-right text-sm text-zinc-700 hover:text-zinc-900"
+                  disabled={allNotifications.length === 0}
+                  className="w-full text-right text-sm text-zinc-700 hover:text-zinc-900 disabled:cursor-not-allowed disabled:text-zinc-400"
                   aria-label="Mark all as read"
                 >
                   Mark all as read
@@ -281,42 +269,55 @@ export default function NotificationPanel({
                   onScroll={handleScroll}
                   className="max-h-[70vh] overflow-y-auto px-4 pb-4 sidebar-scroll"
                 >
-                  <ul className="divide-y divide-zinc-200">
-                    {visibleNotifications.map((n) => (
-                      <li key={n.id} className="py-3">
-                        <div className="flex items-start gap-3">
-                          <div
-                            className="mt-0.5 h-3.5 w-3.5 rounded-full bg-theme shrink-0"
-                            style={{ opacity: n.isRead ? 1 : 0.15 }}
-                          />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-start justify-between gap-3">
-                              <p className="truncate text-sm font-medium text-zinc-800">
-                                {n.title}
-                              </p>
-                              <p className="ml-auto shrink-0 text-[10px] text-zinc-500 whitespace-nowrap">
-                                {formatRelativeTime(n.createdAt)}
-                              </p>
-                            </div>
-                            <div className="mt-1 flex items-center justify-between gap-2">
-                              <p className="text-xs text-zinc-600 truncate">
-                                {n.body}
-                              </p>
-                              {!n.isRead && (
-                                <button
-                                  onClick={() => markAsRead(n.id)}
-                                  className="shrink-0 text-[10px] font-medium text-zinc-600 hover:text-zinc-800"
-                                  aria-label={`Mark ${n.title} as read`}
-                                >
-                                  Mark as read
-                                </button>
-                              )}
+                  {hasNotifications ? (
+                    <ul className="divide-y divide-zinc-200">
+                      {visibleNotifications.map((n) => (
+                        <li key={n.id} className="py-3">
+                          <div className="flex items-start gap-3">
+                            <div
+                              className="mt-0.5 h-3.5 w-3.5 rounded-full bg-theme shrink-0"
+                              style={{ opacity: n.isRead ? 1 : 0.15 }}
+                            />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-3">
+                                <p className="truncate text-sm font-medium text-zinc-800">
+                                  {n.title}
+                                </p>
+                                <p className="ml-auto shrink-0 text-[10px] text-zinc-500 whitespace-nowrap">
+                                  {formatRelativeTime(n.createdAt)}
+                                </p>
+                              </div>
+                              <div className="mt-1 flex items-center justify-between gap-2">
+                                <p className="text-xs text-zinc-600 truncate">
+                                  {n.body}
+                                </p>
+                                {!n.isRead && (
+                                  <button
+                                    onClick={() => markAsRead(n.id)}
+                                    className="shrink-0 text-[10px] font-medium text-zinc-600 hover:text-zinc-800"
+                                    aria-label={`Mark ${n.title} as read`}
+                                  >
+                                    Mark as read
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="flex min-h-28 items-center justify-center px-4 py-8 text-center">
+                      <div>
+                        <p className="text-sm font-medium text-zinc-700">
+                          No notifications yet
+                        </p>
+                        <p className="mt-1 text-xs text-zinc-500">
+                          You&apos;re all caught up.
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {isLoadingMore && hasMoreNotifications && (
                     <div className="flex items-center justify-center gap-2 py-3 text-xs text-zinc-500">
@@ -329,7 +330,8 @@ export default function NotificationPanel({
                 <div className="border-t border-zinc-200 bg-zinc-50 px-4 py-3">
                   <button
                     onClick={markAllAsRead}
-                    className="w-full text-right text-sm text-zinc-700 hover:text-zinc-900"
+                    disabled={allNotifications.length === 0}
+                    className="w-full text-right text-sm text-zinc-700 hover:text-zinc-900 disabled:cursor-not-allowed disabled:text-zinc-400"
                     aria-label="Mark all as read"
                   >
                     Mark all as read
