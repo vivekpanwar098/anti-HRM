@@ -5,6 +5,9 @@ import { MenuIcon, Bell, LogOut, User, PlusIcon } from "lucide-react";
 import useAuth from "@/features/auth/hooks/useAuth";
 import Image from "next/image";
 import Link from "next/link";
+import NotificationPanel from "@/components/NotificationPanel";
+import api from "@/services/axios";
+import { toast } from "sonner";
 
 type HeaderProps = {
   openSidebar: () => void;
@@ -13,6 +16,9 @@ type HeaderProps = {
 export default function Header({ openSidebar }: HeaderProps) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -22,7 +28,13 @@ export default function Header({ openSidebar }: HeaderProps) {
         setOpen(false);
     }
 
+    api
+      .get("/notifications/unread")
+      .then((res) => setUnreadNotificationCount(res.data.notificationsCount))
+      .catch(() => toast.error("Failed to fetch unread notifications count"));
+
     document.addEventListener("click", onDoc);
+
     return () => document.removeEventListener("click", onDoc);
   }, []);
 
@@ -40,7 +52,6 @@ export default function Header({ openSidebar }: HeaderProps) {
         .toUpperCase()
     : "U";
 
-  const notificationCount = 8;
   return (
     <header className="w-full bg-white shadow-md">
       <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4 lg:justify-end">
@@ -55,28 +66,40 @@ export default function Header({ openSidebar }: HeaderProps) {
 
         <div className="flex gap-6">
           {/* Add Employee button  */}
-          <Link
-            href="/admin/employees/new"
-            className="p-2 bg-theme/80 hover:bg-theme flex gap-2 text-gray-100 hover:text-white rounded-lg text-sm items-center transition duration-400"
-          >
-            <PlusIcon className="h-4 w-4 shrink-0" /> Add Employee
-          </Link>
+          {user && user.role === "admin" && (
+            <Link
+              href="/admin/employees/new"
+              className="p-2 bg-theme/80 hover:bg-theme flex gap-2 text-gray-100 hover:text-white rounded-lg text-sm items-center transition duration-400"
+            >
+              <PlusIcon className="h-4 w-4 shrink-0" /> Add Employee
+            </Link>
+          )}
 
           {/* Notification button */}
           <button
             className="relative p-2 rounded-full text-gray-600 hover:bg-gray-100"
             aria-label="Notifications"
+            onClick={() => setIsNotificationPanelOpen((v) => !v)}
           >
             <Bell />
 
             {/* notification badge  */}
-            {Boolean(notificationCount) && (
+            {Boolean(unreadNotificationCount) && (
               <span className="absolute top-0 right-0 h-5 w-5 rounded-full bg-theme flex items-center justify-center text-[10px] text-white border-2 border-white">
-                {notificationCount > 9 ? "9+" : notificationCount}
+                {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
               </span>
             )}
           </button>
 
+          {isNotificationPanelOpen && (
+            <NotificationPanel
+              closeNotificationPanel={() => setIsNotificationPanelOpen(false)}
+              unreadNotificationCount={unreadNotificationCount}
+              setUnreadNotificationCount={(count) =>
+                setUnreadNotificationCount(count)
+              }
+            />
+          )}
           {/* Profile dropdown */}
           <div className="relative" ref={ref}>
             <button
@@ -100,6 +123,13 @@ export default function Header({ openSidebar }: HeaderProps) {
                 </div>
               )}
             </button>
+
+            {isNotificationPanelOpen && (
+              <NotificationPanel
+                closeNotificationPanel={() => setIsNotificationPanelOpen(false)}
+                unreadNotificationCount={unreadNotificationCount}
+              />
+            )}
 
             {open && (
               <div
