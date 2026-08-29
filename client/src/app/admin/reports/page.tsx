@@ -39,22 +39,7 @@ export default function ReportsPage() {
   }, []);
 
   // ✅ API CALL: report download karna
-  const handleDownload = async (report: ReportActivity) => {
-    try {
-      setDownloadingId(report.id);
-      const blob = await reportService.download(report.id);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${report.name}.pdf`;
-      link.click();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Download report error:", err);
-    } finally {
-      setDownloadingId(null);
-    }
-  };
+
 
   if (loading) {
     return (
@@ -156,8 +141,6 @@ export default function ReportsPage() {
                       </button>
                       <button
                         title="Download"
-                        onClick={() => handleDownload(report)}
-                        disabled={downloadingId === report.id}
                         className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-50"
                       >
                         <Download className="w-3.5 h-3.5" />
