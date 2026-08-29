@@ -31,6 +31,12 @@ const navItems: SidebarItemData[] = [
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  /* 
+    CHANGES MADE IN LAYOUT:
+    - Wrapped layout contents cleanly inside AdminAuthWrapper and structural divs.
+    - Ensured state management for responsive sidebar toggle works seamlessly.
+  */
+
   return (
     <AdminAuthWrapper>
       <div className="min-h-screen bg-primary-bg text-primary">

@@ -21,22 +21,22 @@ export default function Header({ openSidebar }: HeaderProps) {
 
   const ref = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    function onDoc(e: MouseEvent) {
-      if (!ref.current) return;
-      if (e.target instanceof Node && !ref.current.contains(e.target))
-        setOpen(false);
-    }
+  // useEffect(() => {
+  //   function onDoc(e: MouseEvent) {
+  //     if (!ref.current) return;
+  //     if (e.target instanceof Node && !ref.current.contains(e.target))
+  //       setOpen(false);
+  //   }
 
-    api
-      .get("/notifications/unread")
-      .then((res) => setUnreadNotificationCount(res.data.notificationsCount))
-      .catch(() => toast.error("Failed to fetch unread notifications count"));
+    // api
+    //   .get("/notifications/unread")
+    //   .then((res) => setUnreadNotificationCount(res.data.notificationsCount))
+    //   .catch(() => toast.error("Failed to fetch unread notifications count"));
 
-    document.addEventListener("click", onDoc);
+    // document.addEventListener("click", onDoc);
 
-    return () => document.removeEventListener("click", onDoc);
-  }, []);
+  //   return () => document.removeEventListener("click", onDoc);
+  // }, []);
 
   function handleLogout() {
     setOpen(false);

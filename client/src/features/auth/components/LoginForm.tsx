@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import useAuth from "../hooks/useAuth";
 
 type Role = "admin" | "employee";
 
@@ -21,58 +22,17 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const {login} = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    try {
-      const res = await fetch(
-        "https://crm-portal-be-zo92.onrender.com/api/auth/signin",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        }
-      );
-
-      const data: LoginResponse = await res.json();
-
-      if (res.ok) {
-        const role = data.user?.role;
-
-        if (!role) {
-          setError("Login succeeded but no role was returned. Contact admin.");
-          return;
-        }
-
-        // Persist for client-side route guarding / API calls.
-        // NOTE: for real authorization, the backend must verify the role
-        // on every protected request — this only drives the redirect UX.
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-        }
-        localStorage.setItem("role", role);
-
-        if (role === "admin") {
-          router.push("/admin/dashboard");
-        } else if (role === "employee") {
-          router.push("/employee/dashboard");
-        } else {
-          setError(`Unrecognized role "${role}". Contact admin.`);
-        }
-      } else {
-        setError(data.message || "Login failed. Please check your credentials.");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Something went wrong. Please try again.");
-    } finally {
+    login(email, password).then(()=>setLoading(false)).catch((err: any) => {
       setLoading(false);
-    }
+      setError("Something went wrong. Please try again.");
+    });
   };
 
   return (
