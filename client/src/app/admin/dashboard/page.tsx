@@ -1,16 +1,10 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { 
-  TrendingUp, 
-  Calendar, 
-  ChevronLeft, 
-  ChevronRight 
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { TrendingUp, Calendar } from "lucide-react";
 import AttendanceCard from "./components/AttendanceCard";
 import MonthlyAttendanceCard from "./components/MonthlyAttendanceCard";
-// Fixed import path to match your folder structure
-import { getDashboardStats } from "@/services/dashboard.service";
+import { getDashboardStats } from "@/features/admin/services/dashboard.service";
 
 type DashboardStats = {
   totalEmployees: number;
@@ -19,28 +13,32 @@ type DashboardStats = {
   attendancePercent: number;
   onLeave: number;
   newEmployees: number;
+  monthlyAttendanceTrend?: { date: string; attendancePercent: number }[];
+};
+
+const monthNames = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+const formatToday = (d: Date) =>
+  `${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+
+const getGreeting = (d: Date) => {
+  const hour = d.getHours();
+  if (hour >= 5 && hour < 12) return "Good Morning";
+  if (hour >= 12 && hour < 18) return "Good Afternoon";
+  return "Good Night";
 };
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [now, setNow] = useState<Date | null>(null);
 
-  // Calendar Dropdown States
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 7, 27)); 
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 7, 27));
-  const calendarRef = useRef<HTMLDivElement>(null);
-
-  // Close calendar on outside click
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
-        setIsCalendarOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    setNow(new Date());
   }, []);
 
   useEffect(() => {
@@ -50,7 +48,7 @@ export default function AdminDashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
+  if (loading || !now) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <div className="w-16 h-16 border-4 border-gray-200 border-t-[#18A096] rounded-full animate-spin"></div>
@@ -63,116 +61,22 @@ export default function AdminDashboardPage() {
     return <div className="p-10 text-center text-red-500 font-medium">Failed to load: {error}</div>;
   }
 
-  // Calendar Helpers
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const daysInPrevMonth = new Date(year, month, 0).getDate();
-
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-  const handlePrevMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
-  };
-
-  const handleNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
-  };
-
-  const formattedDisplayDate = `${selectedDate.getDate()} ${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
-
   return (
     <div className="space-y-6">
-      {/* Banner with Calendar Dropdown */}
-      <div className="bg-gradient-to-r from-[#18A096] to-[#12544F] rounded-2xl p-6 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-md relative">
+      <div className="bg-linear-to-r from-[#18A096] to-[#12544F] rounded-2xl p-6 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-md relative">
         <div>
-          <h1 className="text-2xl font-bold">Good Morning, HR Admin</h1>
+          <h1 className="text-2xl font-bold">{getGreeting(now)}, HR Admin</h1>
           <p className="text-sm text-white/80">
             Here&apos;s what&apos;s happening across your organization today.
           </p>
         </div>
 
-        {/* Interactive Calendar Dropdown Button */}
-        <div className="relative" ref={calendarRef}>
-          <button
-            onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-            className="bg-white text-gray-800 px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors"
-          >
-            <Calendar size={16} className="text-[#18A096]" />
-            <span>{formattedDisplayDate}</span>
-          </button>
-
-          {/* Calendar Popup Box */}
-          {isCalendarOpen && (
-            <div className="absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-2xl border border-gray-100 p-5 text-gray-800 z-50">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-gray-900">{monthNames[month]}</span>
-                  <span className="text-2xl font-bold text-gray-900">{year}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={handlePrevMonth}
-                    className="p-1.5 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-                  <button
-                    onClick={handleNextMonth}
-                    className="p-1.5 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-7 gap-y-3 gap-x-2 text-center text-xs text-gray-400 font-semibold mb-2">
-                <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-              </div>
-
-              <div className="grid grid-cols-7 gap-y-2 gap-x-1 text-center">
-                {Array.from({ length: firstDayOfMonth }).map((_, index) => {
-                    const dayNum = daysInPrevMonth - firstDayOfMonth + index + 1;
-                   return (
-                <div key={`prev-${index}`} className="py-2 text-sm text-gray-300 font-medium">
-                    {dayNum}
-                   </div>
-                 );
-                })}
-
-                {Array.from({ length: daysInMonth }).map((_, index) => {
-                  const dayNum = index + 1;
-                  const isSelected =
-                    selectedDate.getDate() === dayNum &&
-                    selectedDate.getMonth() === month &&
-                    selectedDate.getFullYear() === year;
-
-                  return (
-                    <button
-                      key={`curr-${dayNum}`}
-                      onClick={() => {
-                        setSelectedDate(new Date(year, month, dayNum));
-                        setIsCalendarOpen(false);
-                      }}
-                      className={`py-2 text-sm font-medium rounded-xl transition-all ${
-                        isSelected
-                          ? "bg-[#18A096] text-white shadow-md"
-                          : "text-gray-800 hover:bg-gray-100"
-                      }`}
-                    >
-                      {dayNum}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+        <div className="bg-white text-gray-800 px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-medium shadow-sm">
+          <Calendar size={16} className="text-[#18A096]" />
+          <span>{formatToday(now)}</span>
         </div>
       </div>
 
-      {/* Stats Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-start">
           <div>
@@ -226,13 +130,12 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Attendance Cards Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         <div className="lg:col-span-2">
-          <MonthlyAttendanceCard />
+          <MonthlyAttendanceCard data={stats?.monthlyAttendanceTrend ?? []} />
         </div>
         <div className="lg:col-span-1">
-          <AttendanceCard />
+          <AttendanceCard present={stats?.attendancePercent ?? 0} />
         </div>
       </div>
     </div>

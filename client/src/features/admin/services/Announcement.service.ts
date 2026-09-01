@@ -1,8 +1,8 @@
 import api from "@/lib/utils/axios";
 
-// ⚠️ assumption: API response has no "status" (Published/Draft) field at all —
+
 // only title, body, type, createdBy, createdAt, updatedAt. Confirm with backend
-// if Draft/Publish is meant to exist; until then everything fetched is treated as live.
+
 
 export interface AnnouncementAuthor {
   _id: string;
@@ -13,7 +13,7 @@ export interface Announcement {
   _id: string;
   title: string;
   body: string;
-  type: string; // e.g. "All" — audience. Confirm full list of allowed values with backend.
+  type: string; 
   createdBy: AnnouncementAuthor;
   createdAt: string;
   updatedAt: string;
@@ -23,8 +23,7 @@ export interface AnnouncementPagination {
   page: number;
   limit: number;
   total: number;
-  // ⚠️ assumption: screenshot cut off before showing the rest of "pagination" —
-  // confirm exact keys (e.g. totalPages) once visible.
+
 }
 
 export interface AnnouncementListResponse {
@@ -64,7 +63,7 @@ export const announcementService = {
     return res.data;
   },
 
-  // PATCH /announcement/:id -> edit karna (⚠️ endpoint confirm karna, not seen in Postman yet)
+  // PATCH /announcement/:id -> edit karna 
   update: async (
     id: string,
     payload: Partial<CreateAnnouncementPayload>
@@ -76,7 +75,7 @@ export const announcementService = {
     return res.data;
   },
 
-  // DELETE /announcement/:id -> delete karna (⚠️ endpoint confirm karna, not seen in Postman yet)
+  // DELETE /announcement/:id -> delete karna 
   delete: async (id: string): Promise<ApiResponse<null>> => {
     const res = await api.delete<ApiResponse<null>>(`/announcement/${id}`);
     return res.data;
