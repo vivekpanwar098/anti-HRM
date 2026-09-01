@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
-import { employeeService } from "@/services/employeeService";
+import { employeeService } from "@/features/admin/services/employee.service";
 import { AxiosError } from "axios";
 
 interface AddEmployeeModalProps {

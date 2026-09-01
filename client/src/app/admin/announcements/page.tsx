@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, X } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Plus, Edit, Trash2, X, AlertTriangle } from "lucide-react";
 import {
   announcementService,
   Announcement,
   CreateAnnouncementPayload,
-} from "@/services/Announcementservice";
+} from "@/features/admin/services/Announcement.service";
 
-const AUDIENCE_OPTIONS = ["All", "Employees", "Managers"]; // ⚠️ only "All" confirmed via API so far
+const AUDIENCE_OPTIONS = ["All", "IT", "Marketing"]; 
 
 const formatDate = (iso: string) => {
   const d = new Date(iso);
@@ -34,25 +34,32 @@ export default function AnnouncementsPage() {
     type: "All",
   });
 
+  // ── Delete confirmation state ──
+  const [deleteTarget, setDeleteTarget] = useState<Announcement | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   // ✅ API CALL: announcements list fetch karna
-  const fetchAnnouncements = async (pageNum: number = 1) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await announcementService.getAll(pageNum, limit);
-      setAnnouncements(res.data || []);
-      setTotalCount(res.pagination?.total ?? res.data?.length ?? 0);
-    } catch (err) {
-      console.error("Announcements fetch error:", err);
-      setError("Announcements could not be loaded. Please retry.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchAnnouncements = useCallback(
+    async (pageNum: number = 1) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await announcementService.getAll(pageNum, limit);
+        setAnnouncements(res.data || []);
+        setTotalCount(res.pagination?.total ?? res.data?.length ?? 0);
+      } catch (err) {
+        console.error("Announcements fetch error:", err);
+        setError("Announcements could not be loaded. Please retry.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [limit]
+  );
 
   useEffect(() => {
     fetchAnnouncements(page);
-  }, [page]);
+  }, [page, fetchAnnouncements]);
 
   // ✅ API CALL: naya announcement create karna
   const handleCreate = async (e: React.FormEvent) => {
@@ -77,13 +84,29 @@ export default function AnnouncementsPage() {
     }
   };
 
-  // ✅ API CALL: announcement delete karna
-  const handleDelete = async (id: string) => {
+  // ── Delete: opens confirmation modal instead of deleting directly ──
+  const handleDeleteClick = (item: Announcement) => {
+    setDeleteTarget(item);
+  };
+
+  const closeDeleteModal = () => {
+    if (deleting) return; // avoid closing mid-request
+    setDeleteTarget(null);
+  };
+
+  // ✅ API CALL: announcement delete karna (runs only after confirmation)
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await announcementService.delete(id);
+      setDeleting(true);
+      await announcementService.delete(deleteTarget._id);
+      setDeleteTarget(null);
       fetchAnnouncements(page);
     } catch (err) {
       console.error("Delete announcement error:", err);
+      setError("Could not delete announcement. Please try again.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -99,7 +122,7 @@ export default function AnnouncementsPage() {
   return (
     <div className="space-y-6">
       {/* Top Header Banner */}
-      <div className="bg-gradient-to-r from-[#18A096] to-[#12544F] rounded-2xl p-6 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-md">
+      <div className="bg-linear-to-r from-[#18A096] to-[#12544F] rounded-2xl p-6 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-md">
         <div>
           <h1 className="text-2xl font-bold">Announcements</h1>
           <p className="text-sm text-white/80 mt-0.5">
@@ -145,7 +168,7 @@ export default function AnnouncementsPage() {
                   <Edit size={13} /> Edit
                 </button>
                 <button
-                  onClick={() => handleDelete(item._id)}
+                  onClick={() => handleDeleteClick(item)}
                   className="flex items-center gap-1 px-3 py-1.5 border border-rose-100 hover:bg-rose-50 text-rose-600 rounded-lg text-xs font-medium transition-colors"
                 >
                   <Trash2 size={13} /> Delete
@@ -279,6 +302,60 @@ export default function AnnouncementsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
+          onClick={closeDeleteModal}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-7 space-y-5">
+              <div className="h-12 w-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center">
+                <AlertTriangle size={22} strokeWidth={2} />
+              </div>
+
+              <div className="space-y-1.5">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Delete this announcement?
+                </h2>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  <span className="font-medium text-slate-700">
+                    &ldquo;{deleteTarget.title}&rdquo;
+                  </span>{" "}
+                  will be permanently removed. This action cannot be undone.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={closeDeleteModal}
+                  disabled={deleting}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  disabled={deleting}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-60 flex items-center gap-2 min-w-[92px] justify-center"
+                >
+                  {deleting ? (
+                    <span className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    "Delete"
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
